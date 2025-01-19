@@ -40,7 +40,7 @@ A blockchain prototype implementation in Rust, featuring a very minimal web inte
 1. Clone the repository
 
 ```bash
-git clone https://github.com/Gwen-M/rustblock.git
+git clone git@github.com:Gwen-M/rustblock.git
 cd rustblock
 ```
 
