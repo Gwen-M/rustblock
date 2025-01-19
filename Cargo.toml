@@ -1,0 +1,11 @@
+[package]
+name = "rustblock"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = { version = "0.4.39", features = ["serde"] }
+parking_lot = "0.12.3"
+rouille = "3.6.2"
+serde = { version = "1.0.217", features = ["derive"] }
+sha2 = "0.10.8"

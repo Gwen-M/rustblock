@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Explorer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .block {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blockchain Explorer</h1>
+    
+    <div class="form-group">
+        <h3>Créer un nouveau bloc</h3>
+        <input type="text" id="blockData" placeholder="Données du bloc">
+        <button onclick="mintBlock()">Créer</button>
+    </div>
+
+    <div class="form-group">
+        <h3>Ajouter un pair</h3>
+        <input type="text" id="peerAddress" placeholder="Adresse du pair">
+        <button onclick="addPeer()">Ajouter</button>
+    </div>
+
+    <div class="form-group">
+        <h3>Pairs connectés</h3>
+        <button onclick="loadPeers()">Actualiser les pairs</button>
+        <div id="peers"></div>
+    </div>
+
+    <h3>Blocs existants</h3>
+    <div id="blocks"></div>
+
+    <script>
+        async function loadBlocks() {
+            const response = await fetch('/blocks');
+            const data = await response.json();
+            const blocksDiv = document.getElementById('blocks');
+            blocksDiv.innerHTML = data.blocks.map(block => `
+                <div class="block">
+                    <div>Index: ${block.index}</div>
+                    <div>Hash: ${block.hash}</div>
+                    <div>Previous Hash: ${block.previous_hash || 'None'}</div>
+                    <div>Timestamp: ${block.timestamp}</div>
+                    <div>Data: ${block.data}</div>
+                </div>
+            `).join('');
+        }
+
+        async function mintBlock() {
+            const data = document.getElementById('blockData').value;
+            await fetch('/mintBlock', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({data})
+            });
+            loadBlocks();
+        }
+
+        async function loadPeers() {
+            const response = await fetch('/peers');
+            const data = await response.json();
+            const peersDiv = document.getElementById('peers');
+            if (data.peers.length === 0) {
+                peersDiv.innerHTML = '<p>Aucun pair connecté</p>';
+            } else {
+                peersDiv.innerHTML = '<ul>' + 
+                    data.peers.map(peer => `<li>${peer}</li>`).join('') + 
+                    '</ul>';
+            }
+        }
+
+        async function addPeer() {
+            const peer = document.getElementById('peerAddress').value;
+            const response = await fetch('/addPeer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({peer})
+            });
+            
+            if (response.status === 409) {
+                alert('Ce pair est déjà connecté');
+            } else if (response.ok) {
+                document.getElementById('peerAddress').value = '';
+                loadPeers();
+            } else {
+                alert('Erreur lors de l\'ajout du pair');
+            }
+        }
+
+        loadBlocks();
+        loadPeers();
+    </script>
+</body>
+</html> 
